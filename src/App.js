@@ -5,11 +5,7 @@ const CHIPS=['How do I prepare for a first date?','Give me date ideas',"How do I
 function fmt(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^- (.*?)$/gm,'<li>$1</li>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');}
 function Dots(){return React.createElement('div',{style:{display:'flex',gap:12,alignItems:'flex-start'}},React.createElement('div',{style:S.ab},'SC'),React.createElement('div',{style:S.dots},[0,1,2].map(i=>React.createElement('div',{key:i,style:{...S.dot,animationDelay:i*.2+'s'}}))));}
 export default function App(){
-const[msgs,setMsgs]=useState([]);
-const[hist,setHist]=useState([]);
-const[inp,setInp]=useState('');
-const[load,setLoad]=useState(false);
-const[err,setErr]=useState(null);
+const[msgs,setMsgs]=useState([]);const[hist,setHist]=useState([]);const[inp,setInp]=useState('');const[load,setLoad]=useState(false);const[err,setErr]=useState(null);
 const bot=useRef(null);const ta=useRef(null);
 useEffect(()=>{bot.current?.scrollIntoView({behavior:'smooth'});},[msgs,load]);
 function resize(){const e=ta.current;if(!e)return;e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';}
@@ -19,21 +15,17 @@ setInp('');if(ta.current)ta.current.style.height='auto';
 setErr(null);setMsgs(p=>[...p,{r:'user',t:msg}]);
 const nh=[...hist,{role:'user',content:msg}];setHist(nh);setLoad(true);
 try{
-const k=process.env.REACT_APP_ANTHROPIC_API_KEY;
-if(!k||k==='your_api_key_here')throw new Error('Set REACT_APP_ANTHROPIC_API_KEY in Vercel');
-const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-calls':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:nh})});
-if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'API error '+res.status);}
+const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:nh})});
+if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'Error '+res.status);}
 const d=await res.json();const rt=d.content?.[0]?.text||'';
-setHist(p=>[...p,{role:'assistant',content:rt}]);
-setMsgs(p=>[...p,{r:'bot',t:rt}]);
+setHist(p=>[...p,{role:'assistant',content:rt}]);setMsgs(p=>[...p,{r:'bot',t:rt}]);
 }catch(e){setErr(e.message);}finally{setLoad(false);}
 }
-const showChips=msgs.length===0;
 return React.createElement('div',{style:S.page},
 React.createElement('header',{style:S.hdr},React.createElement('div',{style:S.logo},'SC'),React.createElement('div',null,React.createElement('div',{style:S.ht},'Shidduch Coach'),React.createElement('div',{style:S.hs},'Beis Yaakov Dating Coach')),React.createElement('div',{style:S.badge},'Tznius')),
 React.createElement('div',{style:S.scroll},React.createElement('div',{style:S.wrap},
 React.createElement('div',{style:S.dv},'All conversations are private'),
-React.createElement('div',{style:{display:'flex',gap:12,alignItems:'flex-start'}},React.createElement('div',{style:S.ab},'SC'),React.createElement('div',{style:S.bb},React.createElement('strong',null,'Welcome!'),` I am here to guide you through the shidduch process — date ideas, preparation, conversation help, and more.`,showChips&&React.createElement('div',{style:S.chips},CHIPS.map(c=>React.createElement('button',{key:c,style:S.chip,onClick:()=>send(c),onMouseEnter:e=>Object.assign(e.target.style,S.chiph),onMouseLeave:e=>Object.assign(e.target.style,S.chip)},c))))),
+React.createElement('div',{style:{display:'flex',gap:12,alignItems:'flex-start'}},React.createElement('div',{style:S.ab},'SC'),React.createElement('div',{style:S.bb},React.createElement('strong',null,'Welcome!'),` I am here to guide you through the shidduch process — date ideas, preparation, conversation help, and more.`,msgs.length===0&&React.createElement('div',{style:S.chips},CHIPS.map(c=>React.createElement('button',{key:c,style:S.chip,onClick:()=>send(c),onMouseEnter:e=>Object.assign(e.target.style,S.chiph),onMouseLeave:e=>Object.assign(e.target.style,S.chip)},c))))),
 msgs.map((m,i)=>React.createElement('div',{key:i,style:{display:'flex',gap:12,alignItems:'flex-start',flexDirection:m.r==='user'?'row-reverse':'row'}},React.createElement('div',{style:m.r==='user'?S.au:S.ab},m.r==='user'?'YOU':'SC'),React.createElement('div',{style:m.r==='user'?S.bu:S.bb,dangerouslySetInnerHTML:{__html:fmt(m.t)}}))),
 load&&React.createElement(Dots,null),
 err&&React.createElement('div',{style:S.er},React.createElement('strong',null,'Error: '),err),

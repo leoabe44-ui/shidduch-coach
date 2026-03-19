@@ -5,11 +5,7 @@ const CHIPS=['How do I prepare for a first date?','Give me date ideas',"How do I
 function fmt(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^- (.*?)$/gm,'<li>$1</li>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');}
 function Dots(){return React.createElement('div',{style:{display:'flex',gap:12,alignItems:'flex-start'}},React.createElement('div',{style:S.ab},'SC'),React.createElement('div',{style:S.dots},[0,1,2].map(i=>React.createElement('div',{key:i,style:{...S.dot,animationDelay:i*.2+'s'}}))));}
 export default function App(){
-const[msgs,setMsgs]=useState([]);
-const[hist,setHist]=useState([]);
-const[inp,setInp]=useState('');
-const[load,setLoad]=useState(false);
-const[err,setErr]=useState(null);
+const[msgs,setMsgs]=useState([]);const[hist,setHist]=useState([]);const[inp,setInp]=useState('');const[load,setLoad]=useState(false);const[err,setErr]=useState(null);
 const bot=useRef(null);const ta=useRef(null);
 useEffect(()=>{bot.current?.scrollIntoView({behavior:'smooth'});},[msgs,load]);
 function resize(){const e=ta.current;if(!e)return;e.style.height='auto';e.style.height=Math.min(e.scrollHeight,120)+'px';}
@@ -22,8 +18,7 @@ try{
 const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:nh})});
 if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'Error '+res.status);}
 const d=await res.json();const rt=d.content?.[0]?.text||'';
-setHist(p=>[...p,{role:'assistant',content:rt}]);
-setMsgs(p=>[...p,{r:'bot',t:rt}]);
+setHist(p=>[...p,{role:'assistant',content:rt}]);setMsgs(p=>[...p,{r:'bot',t:rt}]);
 }catch(e){setErr(e.message);}finally{setLoad(false);}
 }
 return React.createElement('div',{style:S.page},
